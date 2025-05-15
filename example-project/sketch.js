@@ -226,12 +226,14 @@ class Demon {
 
 function createButtons() {
   restartButton = createButton("Holy Bible");
-  restartButton.position(width + 10, 50);
+  restartButton.position(640, 140);
+  restartButton.class("bible-button");
   restartButton.mousePressed(startGame);
   restartButton.hide();
 
   ripButton = createButton("RIP");
-  ripButton.position(width + 10, 100);
+  ripButton.position(640, 220);
+  ripButton.class("rip-button");
   ripButton.mousePressed(() => window.location.href = "/");
   ripButton.hide();
 }
@@ -249,4 +251,4 @@ function showRipGrave() {
 function removeButtons() {
   if (restartButton) restartButton.hide();
   if (ripButton) ripButton.hide();
-}
+} 

@@ -132,3 +132,42 @@ a:hover {
     background-color: rgba(26, 0, 0, 0.8);
     border-radius: 10px;
 }
+.bible-button {
+    padding: 15px 25px;
+    font-size: 16px;
+    background-color: #111;
+    color: white;
+    border: 2px solid gold;
+    border-radius: 6px;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    box-shadow: 0 0 10px #333;
+    cursor: url('https://cur.cursors-4u.net/cursors/cur-13/cur1113.cur'), auto;
+    text-transform: uppercase;
+    transition: all 0.3s;
+}
+
+.bible-button:hover {
+    background-color: #222;
+    box-shadow: 0 0 15px gold;
+    transform: scale(1.05);
+}
+
+.rip-button {
+    padding: 20px;
+    font-size: 20px;
+    background-color: #444;
+    color: #eee;
+    border: 3px solid #222;
+    border-radius: 60% 60% 0 0;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    box-shadow: 0 0 10px #000;
+    cursor: url('https://cur.cursors-4u.net/cursors/cur-13/cur1113.cur'), auto;
+    text-transform: uppercase;
+    transition: all 0.3s;
+}
+
+.rip-button:hover {
+    background-color: #666;
+    box-shadow: 0 0 15px #999;
+    transform: scale(1.05);
+} 
