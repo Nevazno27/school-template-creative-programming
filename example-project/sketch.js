@@ -9,7 +9,10 @@ let animationFrame = 0;
 let showEndMessageTimer = 60;
 let demonSpawnRate = 60;
 let speedUpFactor = 1;
-let restartButton, ripButton;
+let holyBibleButton;
+let angelDevilShown = false;
+let beamShown = false;
+let flameEffect = false;
 
 function setup() {
   createCanvas(600, 400);
@@ -17,45 +20,31 @@ function setup() {
   textAlign(CENTER, CENTER);
   textSize(32);
   frameRate(30);
-  createButtons();
+  createHolyBibleButton();
 }
 
 function draw() {
   background(20);
 
   if (gameStarted) {
-    fill(255);
-    text("Час: " + timeLeft, width / 2, 30);
+    if (gameOverState === null) {
+      fill(255);
+      text("Час: " + timeLeft, width / 2, 30);
 
-    if (frameCount % int(demonSpawnRate / speedUpFactor) === 0 && timeLeft > 5) {
-      let demonsToSpawn = int(random(1, 4));
-      for (let i = 0; i < demonsToSpawn; i++) {
-        if (spawnedDemons < maxDemons) {
-          demons.push(new Demon());
-          spawnedDemons++;
+      if (frameCount % int(demonSpawnRate / speedUpFactor) === 0 && timeLeft > 5) {
+        let demonsToSpawn = int(random(1, 4));
+        for (let i = 0; i < demonsToSpawn; i++) {
+          if (spawnedDemons < maxDemons) {
+            demons.push(new Demon());
+            spawnedDemons++;
+          }
         }
       }
-    }
 
-    if (frameCount % 30 === 0 && timeLeft > 0) {
-      timeLeft--;
-    }
+      if (frameCount % 30 === 0 && timeLeft > 0) {
+        timeLeft--;
+      }
 
-    if (demons.length === 0 && spawnedDemons === maxDemons && gameOverState === null) {
-      gameOverState = 'win';
-      animationFrame = 0;
-      showEndMessageTimer = 90;
-      removeButtons();
-    }
-
-    if (timeLeft <= 0 && gameOverState === null) {
-      gameOverState = 'lose';
-      animationFrame = 0;
-      showEndMessageTimer = 90;
-      removeButtons();
-    }
-
-    if (gameOverState === null) {
       priest.move();
       priest.display();
 
@@ -66,9 +55,23 @@ function draw() {
           speedUpFactor += 0.2;
         }
       }
+
+      if (demons.length === 0 && spawnedDemons === maxDemons) {
+        gameOverState = 'win';
+        animationFrame = 0;
+        showEndMessageTimer = 90;
+      }
+
+      if (timeLeft <= 0) {
+        gameOverState = 'lose';
+        animationFrame = 0;
+        showEndMessageTimer = 90;
+      }
+
     } else {
       drawEndSequence();
     }
+
   } else {
     fill(255);
     textSize(48);
@@ -79,52 +82,57 @@ function draw() {
 }
 
 function drawEndSequence() {
-  if (showEndMessageTimer > 0) {
+  if (gameOverState === 'win' && showEndMessageTimer > 0) {
     showEndMessageTimer--;
+    fill(60, 200, 255);
+    stroke(0);
+    strokeWeight(3);
+    textSize(40);
+    text("ТИ ОЧИСТИВ МІСТО", width / 2, height / 2);
+    priest.display();
 
-    if (gameOverState === 'lose') {
+  } else if (gameOverState === 'win') {
+    animationFrame++;
+
+    if (!angelDevilShown) {
+      drawAngelAndDevil();
+      angelDevilShown = true;
+    }
+
+    if (animationFrame > 30 && animationFrame < 60) {
+      drawFlameBeam();
+    }
+
+    if (animationFrame === 60) {
+      beamShown = false;
+      flameEffect = true;
+    }
+
+    if (flameEffect) {
+      drawFlames();
+    }
+
+    drawAngelAndDevil();
+    priest.display();
+    showHolyBible();
+  }
+
+  if (gameOverState === 'lose') {
+    showEndMessageTimer--;
+    if (showEndMessageTimer > 0) {
       fill(255, 0, 255);
       textSize(40);
       text("ТИ НЕ ЧИСТИЙ", width / 2, height / 2);
-    } else if (gameOverState === 'win') {
-      fill(0, 255, 255);
-      textSize(40);
-      text("ТИ ОЧИСТИВ МІСТО", width / 2, height / 2);
-    }
-
-    priest.display();
-  } else {
-    animationFrame++;
-
-    if (gameOverState === 'lose') {
+      priest.display();
+    } else {
+      animationFrame++;
       if (animationFrame < 60 && animationFrame % 10 < 5) {
         fill(random(200, 255), 0, random(100, 255));
         ellipse(priest.x, priest.y, priest.size + random(-5, 5));
-      } else if (animationFrame === 60) {
+      } else {
         priest.becomeZombie();
         priest.display();
-        showRestartBible();
-      } else {
-        priest.display();
-      }
-    } else if (gameOverState === 'win') {
-      priest.display();
-
-      if (animationFrame === 30) {
-        drawAngelAndDevil();
-      }
-
-      if (animationFrame > 60 && animationFrame < 120) {
-        stroke(255, 255, 0);
-        strokeWeight(3);
-        line(priest.x - 60, priest.y - 70, priest.x, priest.y);
-        line(priest.x + 60, priest.y - 70, priest.x, priest.y);
-      }
-
-      if (animationFrame === 120) {
-        fill(255, 0, 0);
-        ellipse(priest.x, priest.y, priest.size + 30);
-        showRipGrave();
+        showHolyBible();
       }
     }
   }
@@ -134,6 +142,21 @@ function drawAngelAndDevil() {
   textSize(40);
   text("👼", priest.x - 60, priest.y - 70);
   text("👿", priest.x + 60, priest.y - 70);
+}
+
+function drawFlameBeam() {
+  stroke(255, 100, 0);
+  strokeWeight(4);
+  line(priest.x - 60, priest.y - 70, priest.x, priest.y);
+  line(priest.x + 60, priest.y - 70, priest.x, priest.y);
+}
+
+function drawFlames() {
+  noStroke();
+  for (let i = 0; i < 5; i++) {
+    fill(255, random(100, 150), 0, 180);
+    ellipse(priest.x + random(-10, 10), priest.y + random(-20, 20), random(20, 40));
+  }
 }
 
 function mousePressed() {
@@ -152,7 +175,10 @@ function startGame() {
   animationFrame = 0;
   showEndMessageTimer = 60;
   speedUpFactor = 1;
-  removeButtons();
+  angelDevilShown = false;
+  beamShown = false;
+  flameEffect = false;
+  holyBibleButton.show();
 }
 
 class Priest {
@@ -160,7 +186,7 @@ class Priest {
     this.x = width / 2;
     this.y = height - 50;
     this.size = 40;
-    this.speed = 5.5;
+    this.speed = 3.5;
     this.isZombie = false;
   }
 
@@ -170,18 +196,18 @@ class Priest {
 
     push();
     stroke(0);
-    strokeWeight(3);
+    strokeWeight(1.5);
     fill(this.isZombie ? color(180, 0, 0) : color(255, 255, 0));
     let cx = this.x;
     let cy = this.y - 12;
     rectMode(CENTER);
-    rect(cx, cy, 6, 24, 3);
-    rect(cx, cy, 20, 6, 3);
+    rect(cx, cy, 4, 20, 2); // вертикальная часть
+    rect(cx, cy - 2, 14, 4, 2); // горизонтальная часть, ближе к верхней части
     pop();
   }
 
   move() {
-    if (this.isZombie) return;
+    if (this.isZombie || gameOverState !== null) return;
 
     let dx = 0;
     let dy = 0;
@@ -224,31 +250,22 @@ class Demon {
   }
 }
 
-function createButtons() {
-  restartButton = createButton("Holy Bible");
-  restartButton.position(640, 140);
-  restartButton.class("bible-button");
-  restartButton.mousePressed(startGame);
-  restartButton.hide();
-
-  ripButton = createButton("RIP");
-  ripButton.position(640, 220);
-  ripButton.class("rip-button");
-  ripButton.mousePressed(() => window.location.href = "/");
-  ripButton.hide();
+function createHolyBibleButton() {
+  holyBibleButton = createButton("Holy Bible");
+  holyBibleButton.position(20, height + 10);
+  holyBibleButton.mousePressed(startGame);
+  holyBibleButton.style("padding", "10px 20px");
+  holyBibleButton.style("font-size", "16px");
+  holyBibleButton.style("background", "#222");
+  holyBibleButton.style("color", "#aaffee");
+  holyBibleButton.style("border", "2px solid #0ff");
+  holyBibleButton.style("border-radius", "10px");
+  holyBibleButton.style("box-shadow", "0 0 15px #0ff");
+  holyBibleButton.hide();
 }
 
-function showRestartBible() {
-  restartButton.show();
-  ripButton.hide();
+function showHolyBible() {
+  if (holyBibleButton) {
+    holyBibleButton.show();
+  }
 }
-
-function showRipGrave() {
-  ripButton.show();
-  restartButton.hide();
-}
-
-function removeButtons() {
-  if (restartButton) restartButton.hide();
-  if (ripButton) ripButton.hide();
-} 
